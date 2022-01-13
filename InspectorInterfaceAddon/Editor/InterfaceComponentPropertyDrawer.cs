@@ -5,10 +5,10 @@ using System.Linq;
 
 namespace InspectorAddons
 {
-    [CustomPropertyDrawer(typeof(InterfaceField<>))]
-    public class InterfaceFieldPropertyDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(InterfaceComponent<>))]
+    public class InterfaceComponentPropertyDrawer : PropertyDrawer
     {
-        private Component GetComponentWithType(Component component, Type type) 
+        private Component GetComponentWithType(Component component, Type type)
         {
             if (type.IsAssignableFrom(component.GetType()))
                 return component;
@@ -21,22 +21,41 @@ namespace InspectorAddons
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            object fI = fieldInfo.GetValue(property.serializedObject.targetObject);
+            Type fIType = fI.GetType();          
+            
+            Type element = fIType;
+            if (fIType.IsArray)
+            {
+                if (fIType.GetArrayRank() == 0)
+                    return;
+                element = fIType.GetElementType();
+            }
+
+            Type interfaceType = element.GetGenericArguments()[0];
+
+            DrawProperty(position, property, label, interfaceType);
+        }
+
+        private void DrawProperty(
+            Rect position, 
+            SerializedProperty property, 
+            GUIContent label, 
+            Type interfaceType)
+        {
             EditorGUI.BeginProperty(position, label, property);
 
-            var indent = EditorGUI.indentLevel;
-
-            EditorGUI.indentLevel = 0;
-
             var objectWithInterface = property.FindPropertyRelative("_componentWithInterface");
-            var fI = fieldInfo.GetValue(property.serializedObject.targetObject);
-            Type interfaceType = fI.GetType().GetGenericArguments()[0];
 
+            var indent = EditorGUI.indentLevel;
+            
+            EditorGUI.indentLevel = 0;
             EditorGUI.BeginChangeCheck();
             Component inputVal = EditorGUI.ObjectField(
-                    position, 
-                    label, 
+                    position,
+                    label,
                     objectWithInterface.objectReferenceValue,
-                    typeof(Component), 
+                    typeof(Component),
                     true) as Component;
 
             if (inputVal != null && objectWithInterface.objectReferenceValue != inputVal)
@@ -55,8 +74,8 @@ namespace InspectorAddons
                 }
             }
             EditorGUI.indentLevel = indent;
-            
+
             EditorGUI.EndProperty();
-        }           
+        }
     }
 }
