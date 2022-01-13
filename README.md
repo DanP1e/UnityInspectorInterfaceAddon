@@ -5,5 +5,6 @@ and pass the name of the desired interface in angle brackets.
 For example: public InterfaceComponent<YouInterfaceName> _fieldName 
 After that, a field will appear in the inspector that will accept objects 
 inherited from MonoBehaviour and that implements your interface.
+To use interface just cast the InterfaceComponent.Component to you interface.
 
 Good luck)
