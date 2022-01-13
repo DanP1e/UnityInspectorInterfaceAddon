@@ -4,7 +4,7 @@ using UnityEngine;
 namespace InspectorAddons
 {
     [Serializable]
-    public class InterfaceField<T>
+    public class InterfaceComponent<T>
         where T : class
     {      
         [SerializeField]
