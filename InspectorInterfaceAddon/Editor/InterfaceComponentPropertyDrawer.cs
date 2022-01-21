@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using UnityEditor;
-using System.Linq;
+using InspectorAddons.Utilities;
 
 namespace InspectorAddons
 {
@@ -20,19 +20,10 @@ namespace InspectorAddons
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-        {
-            object fI = fieldInfo.GetValue(property.serializedObject.targetObject);
-            Type fIType = fI.GetType();          
-            
-            Type element = fIType;
-            if (fIType.IsArray)
-            {
-                if (fIType.GetArrayRank() == 0)
-                    return;
-                element = fIType.GetElementType();
-            }
+        {            
+            Type targetType = TypeDetector.GetTargetObjectOfProperty(property).GetType();        
 
-            Type interfaceType = element.GetGenericArguments()[0];
+            Type interfaceType = targetType.GetGenericArguments()[0];
 
             DrawProperty(position, property, label, interfaceType);
         }
