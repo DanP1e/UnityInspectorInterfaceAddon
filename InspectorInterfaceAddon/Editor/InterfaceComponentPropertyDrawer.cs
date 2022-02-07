@@ -1,14 +1,13 @@
 ﻿using System;
-using UnityEngine;
 using UnityEditor;
-using InspectorAddons.Utilities;
+using UnityEngine;
 
 namespace InspectorAddons
 {
     [CustomPropertyDrawer(typeof(InterfaceComponent<>))]
-    public class InterfaceComponentPropertyDrawer : PropertyDrawer
+    public class InterfaceComponentPropertyDrawer : InterfacePropertyDrawer<Component>
     {
-        private Component GetComponentWithType(Component component, Type type)
+        protected override Component GetComponentWithType(Component component, Type type)
         {
             if (type.IsAssignableFrom(component.GetType()))
                 return component;
@@ -17,56 +16,6 @@ namespace InspectorAddons
                 if (type.IsAssignableFrom(item.GetType()))
                     return item;
             return null;
-        }
-
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-        {            
-            Type targetType = TypeDetector.GetTargetObjectOfProperty(property).GetType();        
-
-            Type interfaceType = targetType.GetGenericArguments()[0];
-
-            DrawProperty(position, property, label, interfaceType);
-        }
-
-        private void DrawProperty(
-            Rect position, 
-            SerializedProperty property, 
-            GUIContent label, 
-            Type interfaceType)
-        {
-            EditorGUI.BeginProperty(position, label, property);
-
-            var objectWithInterface = property.FindPropertyRelative("_componentWithInterface");
-
-            var indent = EditorGUI.indentLevel;
-            
-            EditorGUI.indentLevel = 0;
-            EditorGUI.BeginChangeCheck();
-            Component inputVal = EditorGUI.ObjectField(
-                    position,
-                    label,
-                    objectWithInterface.objectReferenceValue,
-                    typeof(Component),
-                    true) as Component;
-
-            if (inputVal != null && objectWithInterface.objectReferenceValue != inputVal)
-            {
-                Component component = GetComponentWithType(inputVal, interfaceType);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    objectWithInterface.objectReferenceValue = component;
-                }
-            }
-            else
-            {
-                if (EditorGUI.EndChangeCheck())
-                {
-                    objectWithInterface.objectReferenceValue = inputVal;
-                }
-            }
-            EditorGUI.indentLevel = indent;
-
-            EditorGUI.EndProperty();
         }
     }
 }
